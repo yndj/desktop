@@ -181,6 +181,9 @@ import {
   updateConflictState,
 } from './updates/changes-state'
 
+import { IErrorMetadata } from '../error-with-metadata'
+import { createFailableOperationHandler } from './error-handling'
+
 /**
  * As fast-forwarding local branches is proportional to the number of local
  * branches, and is run after every fetch/push/pull, this is skipped when the
@@ -394,6 +397,15 @@ export class AppStore extends TypedBaseStore<IAppState> {
 
     this.apiRepositoriesStore.onDidUpdate(() => this.emitUpdate())
     this.apiRepositoriesStore.onDidError(error => this.emitError(error))
+  }
+
+  private withErrorHandling<T>(
+    repository: Repository,
+    action: () => Promise<T>,
+    errorMetadata?: IErrorMetadata
+  ) {
+    const handler = createFailableOperationHandler(repository, this.emitError)
+    return handler(action, errorMetadata)
   }
 
   /** Load the emoji from disk. */
@@ -980,8 +992,12 @@ export class AppStore extends TypedBaseStore<IAppState> {
       return
     }
 
-    const gitStore = this.gitStoreCache.get(repository)
-    const changedFiles = await gitStore.performFailableOperation(() =>
+    const performFailableOperation = createFailableOperationHandler(
+      repository,
+      this.emitError
+    )
+
+    const changedFiles = await performFailableOperation(() =>
       getChangedFiles(repository, currentSHA)
     )
     if (!changedFiles) {
@@ -1739,10 +1755,13 @@ export class AppStore extends TypedBaseStore<IAppState> {
       return file.selection.getSelectionType() !== DiffSelectionType.None
     })
 
-    const gitStore = this.gitStoreCache.get(repository)
-
     const result = await this.isCommitting(repository, () => {
-      return gitStore.performFailableOperation(async () => {
+      const performFailableOperation = createFailableOperationHandler(
+        repository,
+        this.emitError
+      )
+
+      return performFailableOperation(async () => {
         const message = await formatCommitMessage(repository, context)
         return createCommit(repository, message, selectedFiles)
       })
@@ -1876,8 +1895,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
   private async recoverMissingRepository(
     repository: Repository
   ): Promise<Repository> {
-    /* 
-        if the repository is marked missing, check to see if the file path exists, 
+    /*
+        if the repository is marked missing, check to see if the file path exists,
         and if so then see if git recognizes the path as a valid repository,
         and if so, reset the missing status as its been restored
       */
@@ -2004,7 +2023,7 @@ export class AppStore extends TypedBaseStore<IAppState> {
 
     if (this.shouldBackgroundFetch(repository, lastPush)) {
       await this.withAuthenticatingUser(repository, (repo, account) => {
-        return gitStore.performFailableOperation(() => {
+        return this.withErrorHandling(repo, () => {
           return gitStore.fetch(account, true)
         })
       })
@@ -2061,9 +2080,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
   }
 
   private async refreshAuthor(repository: Repository): Promise<void> {
-    const gitStore = this.gitStoreCache.get(repository)
     const commitAuthor =
-      (await gitStore.performFailableOperation(() =>
+      (await this.withErrorHandling(repository, () =>
         getAuthorIdentity(repository)
       )) || null
 
@@ -2138,8 +2156,7 @@ export class AppStore extends TypedBaseStore<IAppState> {
     name: string,
     startPoint?: string
   ): Promise<Repository> {
-    const gitStore = this.gitStoreCache.get(repository)
-    const branch = await gitStore.performFailableOperation(() =>
+    const branch = await this.withErrorHandling(repository, () =>
       createBranch(repository, name, startPoint)
     )
 
@@ -2178,7 +2195,6 @@ export class AppStore extends TypedBaseStore<IAppState> {
     repository: Repository,
     branch: Branch | string
   ): Promise<Repository> {
-    const gitStore = this.gitStoreCache.get(repository)
     const kind = 'checkout'
 
     const foundBranch =
@@ -2190,10 +2206,10 @@ export class AppStore extends TypedBaseStore<IAppState> {
       return repository
     }
 
-    await this.withAuthenticatingUser(repository, (repository, account) =>
-      gitStore.performFailableOperation(() =>
-        checkoutBranch(repository, account, foundBranch, progress => {
-          this.updateCheckoutProgress(repository, progress)
+    await this.withAuthenticatingUser(repository, (repo, account) =>
+      this.withErrorHandling(repo, () =>
+        checkoutBranch(repo, account, foundBranch, progress => {
+          this.updateCheckoutProgress(repo, progress)
         })
       )
     )
@@ -2342,8 +2358,7 @@ export class AppStore extends TypedBaseStore<IAppState> {
     branch: Branch,
     newName: string
   ): Promise<void> {
-    const gitStore = this.gitStoreCache.get(repository)
-    await gitStore.performFailableOperation(() =>
+    await this.withErrorHandling(repository, () =>
       renameBranch(repository, branch, newName)
     )
 
@@ -2366,14 +2381,10 @@ export class AppStore extends TypedBaseStore<IAppState> {
         )
       }
 
-      const gitStore = this.gitStoreCache.get(r)
-
-      await gitStore.performFailableOperation(() =>
-        checkoutBranch(r, account, defaultBranch)
-      )
-      await gitStore.performFailableOperation(() =>
-        deleteBranch(r, branch, account, includeRemote)
-      )
+      await this.withErrorHandling(r, async () => {
+        await checkoutBranch(r, account, defaultBranch)
+        await deleteBranch(r, branch, account, includeRemote)
+      })
 
       return this._refreshRepository(r)
     })
@@ -2459,7 +2470,9 @@ export class AppStore extends TypedBaseStore<IAppState> {
         }
 
         const gitStore = this.gitStoreCache.get(repository)
-        await gitStore.performFailableOperation(
+
+        await this.withErrorHandling(
+          repository,
           async () => {
             await pushRepo(
               repository,
@@ -2668,7 +2681,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
             type: RetryActionType.Pull,
             repository,
           }
-          await gitStore.performFailableOperation(
+          await this.withErrorHandling(
+            repository,
             () =>
               pullRepo(repository, account, remote.name, progress => {
                 this.updatePushPullFetchProgress(repository, {
@@ -2784,10 +2798,11 @@ export class AppStore extends TypedBaseStore<IAppState> {
       private_
     )
 
-    const gitStore = this.gitStoreCache.get(repository)
-    await gitStore.performFailableOperation(() =>
+    await this.withErrorHandling(repository, () =>
       addRemote(repository, 'origin', apiRepository.clone_url)
     )
+
+    const gitStore = this.gitStoreCache.get(repository)
     await gitStore.loadRemotes()
 
     // skip pushing if the current branch is a detached HEAD or the repository
@@ -3145,9 +3160,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
   }
 
   /** This shouldn't be called directly. See `Dispatcher`. */
-  public async _abortMerge(repository: Repository): Promise<void> {
-    const gitStore = this.gitStoreCache.get(repository)
-    return await gitStore.performFailableOperation(() => abortMerge(repository))
+  public _abortMerge(repository: Repository): Promise<void> {
+    return this.withErrorHandling(repository, () => abortMerge(repository))
   }
 
   /** This shouldn't be called directly. See `Dispatcher`. */
@@ -3159,8 +3173,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
     const trackedFiles = workingDirectory.files.filter(f => {
       return f.status.kind !== AppFileStatusKind.Untracked
     })
-    const gitStore = this.gitStoreCache.get(repository)
-    return await gitStore.performFailableOperation(() =>
+
+    return await this.withErrorHandling(repository, () =>
       createMergeCommit(repository, trackedFiles)
     )
   }
