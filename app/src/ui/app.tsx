@@ -2058,15 +2058,17 @@ export class App extends React.Component<IAppProps, IAppState> {
       : this.state.selectedTheme
 
     return (
-      <div id="desktop-app-chrome" className={className}>
-        <AppTheme theme={currentTheme} />
-        {this.renderTitlebar()}
-        {this.state.showWelcomeFlow
-          ? this.renderWelcomeFlow()
-          : this.renderApp()}
-        {this.renderZoomInfo()}
-        {this.renderFullScreenInfo()}
-      </div>
+      <React.StrictMode>
+        <div id="desktop-app-chrome" className={className}>
+          <AppTheme theme={currentTheme} />
+          {this.renderTitlebar()}
+          {this.state.showWelcomeFlow
+            ? this.renderWelcomeFlow()
+            : this.renderApp()}
+          {this.renderZoomInfo()}
+          {this.renderFullScreenInfo()}
+        </div>
+      </React.StrictMode>
     )
   }
 
