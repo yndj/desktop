@@ -80,10 +80,6 @@ describe('BranchPruner', () => {
     await repositoriesDb.reset()
     repositoriesStore = new RepositoriesStore(repositoriesDb)
 
-    repositoriesStateCache = new RepositoryStateCache(
-      () => new Map<string, IGitHubUser>()
-    )
-
     onPruneCompleted = jest.fn(
       () => (repository: Repository, prunedBranches: ReadonlyArray<Branch>) => {
         console.log('repository', repository)
