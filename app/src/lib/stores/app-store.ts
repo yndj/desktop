@@ -182,8 +182,10 @@ import { ApiRepositoriesStore } from './api-repositories-store'
 import {
   updateChangedFiles,
   updateConflictState,
+  updateRebaseState,
 } from './updates/changes-state'
 import { ManualConflictResolution } from '../../models/manual-conflict-resolution'
+import { enableNewRebaseFlow } from '../feature-flag'
 
 /**
  * As fast-forwarding local branches is proportional to the number of local
@@ -1563,6 +1565,11 @@ export class AppStore extends TypedBaseStore<IAppState> {
       conflictState: updateConflictState(state, status, this.statsStore),
     }))
 
+    this.repositoryStateCache.updateChangesState(repository, state => ({
+      rebaseState: updateRebaseState(state, status, this.statsStore),
+    }))
+
+    this._triggerRebaseFlow(repository)
     this._triggerMergeConflictsFlow(repository)
 
     this.emitUpdate()
@@ -1570,6 +1577,34 @@ export class AppStore extends TypedBaseStore<IAppState> {
     this.updateChangesDiffForCurrentSelection(repository)
 
     return true
+  }
+
+  /** display the rebase flow, if necessary */
+  private async _triggerRebaseFlow(repository: Repository) {
+    /** feature not enabled, revert to existing behaviour */
+    if (!enableNewRebaseFlow()) {
+      return
+    }
+
+    // are we already displaying the dialog?
+    const alreadyInFlow =
+      this.currentPopup !== null &&
+      this.currentPopup.type === PopupType.RebaseConflicts
+
+    if (alreadyInFlow) {
+      return
+    }
+
+    const repoState = this.repositoryStateCache.get(repository)
+    const { rebaseState } = repoState.changesState
+    if (rebaseState === null) {
+      return
+    }
+
+    this._showPopup({
+      type: PopupType.RebaseConflicts,
+      repository,
+    })
   }
 
   /** starts the conflict resolution flow, if appropriate */

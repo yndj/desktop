@@ -25,6 +25,7 @@ import { IAheadBehind } from '../../models/branch'
 import { fatalError } from '../../lib/fatal-error'
 import { enableStatusWithoutOptionalLocks } from '../feature-flag'
 import { isMergeHeadSet } from './merge'
+import { isRebaseHeadSet } from './rebase'
 
 /**
  * V8 has a limit on the size of string it can create (~256MB), and unless we want to
@@ -55,6 +56,9 @@ export interface IStatusResult {
 
   /** true if repository is in a conflicted state */
   readonly mergeHeadFound: boolean
+
+  /** true if a rebase is underway in the repository */
+  readonly rebaseHeadFound: boolean
 
   /** the absolute path to the repository's working directory */
   readonly workingDirectory: WorkingDirectoryStatus
@@ -176,6 +180,7 @@ export async function getStatus(
   const entries = parsed.filter(isStatusEntry)
 
   const mergeHeadFound = await isMergeHeadSet(repository)
+  const rebaseHeadFound = await isRebaseHeadSet(repository)
 
   // if we have any conflicted files reported by status, let
   const conflictState = mergeHeadFound
@@ -210,6 +215,7 @@ export async function getStatus(
     branchAheadBehind,
     exists: true,
     mergeHeadFound,
+    rebaseHeadFound,
     workingDirectory,
   }
 }
