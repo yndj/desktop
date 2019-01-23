@@ -67,3 +67,8 @@ export function enableReadmeOverwriteWarning(): boolean {
 export function enableNoChangesCreatePRBlankslateAction(): boolean {
   return enableBetaFeatures()
 }
+
+/** Should the app show the new rebase flow? */
+export function enableNewRebaseFlow(): boolean {
+  return enableDevelopmentFeatures()
+}
