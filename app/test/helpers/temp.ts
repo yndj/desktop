@@ -1,3 +1,5 @@
+/* eslint-disable no-sync */
+
 import * as temp from 'temp'
 const _temp = temp.track()
 
