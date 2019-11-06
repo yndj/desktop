@@ -311,17 +311,7 @@
   resolved "https://registry.yarnpkg.com/@types/mri/-/mri-1.1.0.tgz#66555e4d797713789ea0fefdae0898d8170bf5af"
   integrity sha512-fMl88ZoZXOB7VKazJ6wUMpZc9QIn+jcigSFRf2K/rrw4DcXn+/uGxlWX8DDlcE7JkwgIZ7BDH+JgxZPlc/Ap3g==
 
-"@types/node@*":
-  version "8.0.47"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.47.tgz#968e596f91acd59069054558a00708c445ca30c2"
-  integrity sha512-kOwL746WVvt/9Phf6/JgX/bsGQvbrK5iUgzyfwZNcKVFcjAUVSpF9HxevLTld2SG9aywYHOILj38arDdY1r/iQ==
-
-"@types/node@^8.0.24":
-  version "8.10.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.1.tgz#aac98b810c50568054486f2bb8c486d824713be8"
-  integrity sha512-X/pIUOcgpX7xxKsmdPCMKeDBefsGH/4D/IuJ1gIHbqgWI0qEy/yMKeqaN/sT+rzV9UpAXAfd0kLOVExRmZrXIg==
-
-"@types/node@^8.10.4":
+"@types/node@*", "@types/node@^8.0.24", "@types/node@^8.10.4":
   version "8.10.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.4.tgz#d3ca40ee884c853e2b786ee73096726ec59a5b31"
   integrity sha512-FqpMm0l/JUCXK6HziUoXaxtuiefsyoeQtNy8CSOq31F/m16UNKRG40PezM6hbsUONZohzKnAHa7lEkieyx1ayA==
@@ -702,7 +692,7 @@ acorn-globals@^4.1.0:
 
 acorn-jsx@^3.0.0:
   version "3.0.1"
-  resolved "http://registry.npmjs.org/acorn-jsx/-/acorn-jsx-3.0.1.tgz#afdf9488fb1ecefc8348f6fb22f464e32a58b36b"
+  resolved "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-3.0.1.tgz#afdf9488fb1ecefc8348f6fb22f464e32a58b36b"
   integrity sha1-r9+UiPsezvyDSPb7IvRk4ypYs2s=
   dependencies:
     acorn "^3.0.4"
@@ -716,7 +706,7 @@ acorn-jsx@^4.1.1:
 
 acorn@^3.0.4:
   version "3.3.0"
-  resolved "http://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz#45e37fb39e8da3f25baee3ff5369e2bb5f22017a"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz#45e37fb39e8da3f25baee3ff5369e2bb5f22017a"
   integrity sha1-ReN/s56No/JbruP/U2niu18iAXo=
 
 acorn@^5.0.0:
@@ -3575,10 +3565,10 @@ electron-winstaller@2.5.2:
     lodash.template "^4.2.2"
     temp "^0.8.3"
 
-electron@2.0.13:
-  version "2.0.13"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-2.0.13.tgz#db3949cf4d9d4569be0cec010624746793a406c9"
-  integrity sha512-8ouYaLsp0F4sPI7QKgJkkJhrwj1JPSnBwbz6HHA9l6u7WofEt94lV+gHw71KJrDl7UaIkFwlSjyhIjG8lIZqxw==
+electron@2.0.18:
+  version "2.0.18"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-2.0.18.tgz#52f1b248c3cc013b5a870094de3b6ba5de313a0f"
+  integrity sha512-PQRHtFvLxHdJzMMIwTddUtkS+Te/fZIs+PHO+zPmTUTBE76V3Od3WRGzMQwiJHxN679licmCKhJpMyxZfDEVWQ==
   dependencies:
     "@types/node" "^8.0.24"
     electron-download "^3.0.1"
@@ -3828,7 +3818,7 @@ eslint-visitor-keys@^1.0.0:
 
 eslint@4.19.1:
   version "4.19.1"
-  resolved "http://registry.npmjs.org/eslint/-/eslint-4.19.1.tgz#32d1d653e1d90408854bfb296f076ec7e186a300"
+  resolved "https://registry.npmjs.org/eslint/-/eslint-4.19.1.tgz#32d1d653e1d90408854bfb296f076ec7e186a300"
   integrity sha512-bT3/1x1EbZB7phzYu7vCr1v3ONuzDtX8WjuM9c0iYxe+cq+pwcKEoQjl7zd3RpC6YOLgnSy3cTN58M2jcoPDIQ==
   dependencies:
     ajv "^5.3.0"
@@ -11134,7 +11124,7 @@ whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
 
 whatwg-fetch@^0.11.1:
   version "0.11.1"
-  resolved "http://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-0.11.1.tgz#6d3ded245fdd97cd728e0e2587b54b733949e663"
+  resolved "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-0.11.1.tgz#6d3ded245fdd97cd728e0e2587b54b733949e663"
   integrity sha1-bT3tJF/dl81yjg4lh7VLczlJ5mM=
 
 whatwg-mimetype@^2.1.0:
